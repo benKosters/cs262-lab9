@@ -4,7 +4,7 @@ This is a sample web app that connects to a sample database of monopoly games.
 
 
 The web app is deployed here:
-(https://cs272-lab9-teamd.azurewebsites.net/)[https://cs272-lab9-teamd.azurewebsites.net/]
+[https://cs272-lab9-teamd.azurewebsites.net/](https://cs272-lab9-teamd.azurewebsites.net/)
 
 To get all players:
 [https://cs272-lab9-teamd.azurewebsites.net/players](https://cs272-lab9-teamd.azurewebsites.net/players)
