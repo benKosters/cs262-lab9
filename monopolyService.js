@@ -8,7 +8,7 @@
 
 const pgp = require('pg-promise')();
 
-//uncomment these two lines to test locally
+// uncomment these two lines to test locally
 // const dotenv = require('dotenv');
 // dotenv.config();
 
@@ -40,6 +40,7 @@ router.get('/players/:id', readPlayer);
 router.put('/players/:id', updatePlayer);
 router.post('/players', createPlayer);
 router.delete('/players/:id', deletePlayer);
+//new routes for homework 3
 router.get('/owners', getPropertyOwners);
 router.get('/scores', getCashAndScore);
 
