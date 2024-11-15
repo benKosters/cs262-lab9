@@ -1,25 +1,4 @@
-/* eslint-disable no-template-curly-in-string */
-/* eslint-disable no-console */
-/* eslint-disable no-use-before-define */
-/**
- * This module implements a REST-inspired webservice for the Monopoly DB.
- * The database is hosted on ElephantSQL.
- *
- * Currently, the service supports the player table only.
- *
- * To guard against SQL injection attacks, this code uses pg-promise's built-in
- * variable escaping. This prevents a client from issuing this URL:
- *     https://cs262-webservice.azurewebsites.net//players/1%3BDELETE%20FROM%20PlayerGame%3BDELETE%20FROM%20Player
- * which would delete records in the PlayerGame and then the Player tables.
- * In particular, we don't use JS template strings because it doesn't filter
- * client-supplied values properly.
- * TODO: Consider using Prepared Statements.
- *      https://vitaly-t.github.io/pg-promise/PreparedStatement.html
- *
- * This service assumes that the database connection strings and the server mode are
- * set in environment variables. See the DB_* variables used by pg-promise. And
- * setting NODE_ENV to production will cause ExpressJS to serve up uninformative
- * server error responses for all errors.
+/*
  *
  * @author: kvlinden
  * @date: Summer, 2020
@@ -28,6 +7,11 @@
 // Set up the database connection.
 
 const pgp = require('pg-promise')();
+
+//uncomment these two lines to test locally
+// const dotenv = require('dotenv');
+// dotenv.config();
+
 
 const db = pgp({
     host: process.env.DB_SERVER,
@@ -42,10 +26,11 @@ const db = pgp({
 
 // Configure the server and its routes.
 
+
 const express = require('express');
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 const router = express.Router();
 router.use(express.json());
 
@@ -55,6 +40,8 @@ router.get('/players/:id', readPlayer);
 router.put('/players/:id', updatePlayer);
 router.post('/players', createPlayer);
 router.delete('/players/:id', deletePlayer);
+router.get('/owners', getPropertyOwners);
+router.get('/scores', getCashAndScore);
 
 app.use(router);
 app.listen(port, () => console.log(`Listening on port ${port}`));
@@ -115,6 +102,31 @@ function createPlayer(req, res, next) {
 
 function deletePlayer(req, res, next) {
     db.oneOrNone('DELETE FROM Player WHERE id=${id} RETURNING id', req.params)
+        .then((data) => {
+            returnDataOr404(res, data);
+        })
+        .catch((err) => {
+            next(err);
+        });
+}
+
+function getPropertyOwners(req, res, next) {
+    db.any('SELECT player.name, property.propertyname FROM player, property WHERE property.playerid = player.id')
+        .then((data) => {
+            returnDataOr404(res, data);
+        })
+        .catch((err) => {
+            next(err);
+        });
+}
+
+
+function getCashAndScore(req, res, next) {
+    db.any(
+        `SELECT player.name, playergame.cash, playergame.score
+         FROM player, playergame
+         WHERE player.id = playergame.playerid`
+    )
         .then((data) => {
             returnDataOr404(res, data);
         })
